@@ -115,6 +115,7 @@ define_keywords!(
     CEIL,
     CEILING,
     CHAIN,
+    CHANGE,
     CHAR,
     CHARACTER,
     CHARACTER_LENGTH,
