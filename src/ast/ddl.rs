@@ -213,6 +213,14 @@ impl fmt::Display for AlterColumnOperation {
                     write!(f, "SET DATA TYPE {}", data_type)
                 }
             }
+            AlterTableOperation::ChangeColumn {old_name, new_name, data_type, options} => {
+                write!(f, "CHANGE COLUMN {} {} {}", old_name, new_name, data_type)?;
+                if options.is_empty() {
+                    Ok(())
+                }else {
+                    write!(f, " {}", display_separated(options, " "))
+                }
+            }
         }
     }
 }
