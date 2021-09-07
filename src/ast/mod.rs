@@ -543,6 +543,7 @@ impl fmt::Display for WindowFrameUnits {
     }
 }
 
+
 /// Specifies [WindowFrame]'s `start_bound` and `end_bound`
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -1695,6 +1696,22 @@ impl fmt::Display for GrantObjects {
                     display_comma_separated(schemas)
                 )
             }
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[non_exhaustive]
+pub enum OnInsert {
+    /// ON DUPLICATE KEY UPDATE (MySQL when the key already exists, then execute an update instead)
+    DuplicateKeyUpdate(Vec<Expr>),
+}
+
+impl fmt::Display for OnInsert {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            OnInsert::DuplicateKeyUpdate(expr) => write!(f, " ON DUPLICATE KEY UPDATE {}", display_comma_separated(expr)),
         }
     }
 }
