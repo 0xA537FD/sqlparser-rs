@@ -1022,7 +1022,6 @@ impl fmt::Display for WindowFrameUnits {
     }
 }
 
-
 /// Specifies [WindowFrame]'s `start_bound` and `end_bound`
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -3291,7 +3290,11 @@ pub enum OnInsert {
 impl fmt::Display for OnInsert {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            OnInsert::DuplicateKeyUpdate(expr) => write!(f, " ON DUPLICATE KEY UPDATE {}", display_comma_separated(expr)),
+            Self::DuplicateKeyUpdate(expr) => write!(
+                f,
+                " ON DUPLICATE KEY UPDATE {}",
+                display_comma_separated(expr)
+            ),
         }
     }
 }

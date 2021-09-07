@@ -4689,6 +4689,28 @@ impl<'a> Parser<'a> {
         Ok(ObjectName(idents))
     }
 
+    /// Parse identifiers strictly i.e. don't parse keywords
+    pub fn parse_identifiers_strict(&mut self) -> Result<Vec<Ident>, ParserError> {
+        let mut idents = vec![];
+        loop {
+            match self.peek_token() {
+                Token::Word(w) => {
+                    if w.keyword != Keyword::NoKeyword {
+                        break;
+                    }
+
+                    idents.push(w.to_ident());
+                }
+                Token::EOF | Token::Eq => break,
+                _ => {}
+            }
+
+            self.next_token();
+        }
+
+        Ok(idents)
+    }
+
     /// Parse identifiers
     pub fn parse_identifiers(&mut self) -> Result<Vec<Ident>, ParserError> {
         let mut idents = vec![];
@@ -4702,6 +4724,7 @@ impl<'a> Parser<'a> {
             }
             self.next_token();
         }
+
         Ok(idents)
     }
 
