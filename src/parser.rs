@@ -6150,17 +6150,10 @@ impl<'a> Parser<'a> {
 
             let source = Box::new(self.parse_query()?);
             let on = if self.parse_keyword(Keyword::ON) {
-                if self.parse_keyword(Keyword::CONFLICT) {
-                    let conflict_target =
-                        if self.parse_keywords(&[Keyword::ON, Keyword::CONSTRAINT]) {
-                            Some(ConflictTarget::OnConstraint(self.parse_object_name()?))
-                        } else if self.peek_token() == Token::LParen {
-                            Some(ConflictTarget::Columns(
-                                self.parse_parenthesized_column_list(IsOptional::Mandatory, false)?,
-                            ))
-                        } else {
-                            None
-                        };
+                self.expect_keyword(Keyword::DUPLICATE)?;
+                self.expect_keyword(Keyword::KEY)?;
+                self.expect_keyword(Keyword::UPDATE)?;
+                let l = self.parse_comma_separated(Parser::parse_assignment)?;
 
                     self.expect_keyword(Keyword::DO)?;
                     let action = if self.parse_keyword(Keyword::NOTHING) {
