@@ -1705,7 +1705,7 @@ impl fmt::Display for GrantObjects {
 #[non_exhaustive]
 pub enum OnInsert {
     /// ON DUPLICATE KEY UPDATE (MySQL when the key already exists, then execute an update instead)
-    DuplicateKeyUpdate(Vec<Expr>),
+    DuplicateKeyUpdate(Vec<Assignment>),
 }
 
 impl fmt::Display for OnInsert {
