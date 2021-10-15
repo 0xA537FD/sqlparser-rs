@@ -1898,7 +1898,7 @@ impl<'a> Parser<'a> {
                 data_type,
                 options,
             }
-        }else {
+        } else {
             return self.expected(
                 "ADD, RENAME, PARTITION or DROP after ALTER TABLE",
                 self.peek_token(),
@@ -2160,7 +2160,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Parse identifiers strictly i.e. don't parse keywords
-    pub fn parse_identifiers_strict(&mut self) -> Result<Vec<Ident>, ParserError> {
+    pub fn parse_identifiers_non_keywords(&mut self) -> Result<Vec<Ident>, ParserError> {
         let mut idents = vec![];
         loop {
             match self.peek_token() {
@@ -2996,7 +2996,7 @@ impl<'a> Parser<'a> {
 
     /// Parse a `var = expr` assignment, used in an UPDATE statement
     pub fn parse_assignment(&mut self) -> Result<Assignment, ParserError> {
-        let id = self.parse_identifiers_strict()?;
+        let id = self.parse_identifiers_non_keywords()?;
         self.expect_token(&Token::Eq)?;
         let value = self.parse_expr()?;
         Ok(Assignment { id, value })
