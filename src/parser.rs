@@ -4690,7 +4690,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Parse identifiers strictly i.e. don't parse keywords
-    pub fn parse_identifiers_strict(&mut self) -> Result<Vec<Ident>, ParserError> {
+    pub fn parse_identifiers_non_keywords(&mut self) -> Result<Vec<Ident>, ParserError> {
         let mut idents = vec![];
         loop {
             match self.peek_token() {
