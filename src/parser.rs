@@ -6178,38 +6178,35 @@ impl<'a> Parser<'a> {
                 self.expect_keyword(Keyword::UPDATE)?;
                 let l = self.parse_comma_separated(Parser::parse_assignment)?;
 
-                    self.expect_keyword(Keyword::DO)?;
-                    let action = if self.parse_keyword(Keyword::NOTHING) {
-                        OnConflictAction::DoNothing
-                    } else {
-                        self.expect_keyword(Keyword::UPDATE)?;
-                        self.expect_keyword(Keyword::SET)?;
-                        let assignments = self.parse_comma_separated(Parser::parse_assignment)?;
-                        let selection = if self.parse_keyword(Keyword::WHERE) {
-                            Some(self.parse_expr()?)
-                        } else {
-                            None
-                        };
-                        OnConflictAction::DoUpdate(DoUpdate {
-                            assignments,
-                            selection,
-                        })
-                    };
-
-                    Some(OnInsert::OnConflict(OnConflict {
-                        conflict_target,
-                        action,
-                    }))
+                self.expect_keyword(Keyword::DO)?;
+                let action = if self.parse_keyword(Keyword::NOTHING) {
+                    OnConflictAction::DoNothing
                 } else {
-                    self.expect_keyword(Keyword::DUPLICATE)?;
-                    self.expect_keyword(Keyword::KEY)?;
                     self.expect_keyword(Keyword::UPDATE)?;
-                    let l = self.parse_comma_separated(Parser::parse_assignment)?;
+                    self.expect_keyword(Keyword::SET)?;
+                    let assignments = self.parse_comma_separated(Parser::parse_assignment)?;
+                    let selection = if self.parse_keyword(Keyword::WHERE) {
+                        Some(self.parse_expr()?)
+                    } else {
+                        None
+                    };
+                    OnConflictAction::DoUpdate(DoUpdate {
+                        assignments,
+                        selection,
+                    })
+                };
 
-                    Some(OnInsert::DuplicateKeyUpdate(l))
-                }
+                Some(OnInsert::OnConflict(OnConflict {
+                    conflict_target,
+                    action,
+                }))
             } else {
-                None
+                self.expect_keyword(Keyword::DUPLICATE)?;
+                self.expect_keyword(Keyword::KEY)?;
+                self.expect_keyword(Keyword::UPDATE)?;
+                let l = self.parse_comma_separated(Parser::parse_assignment)?;
+
+                Some(OnInsert::DuplicateKeyUpdate(l))
             };
 
             let returning = if self.parse_keyword(Keyword::RETURNING) {
