@@ -4693,7 +4693,7 @@ impl<'a> Parser<'a> {
     pub fn parse_identifiers_non_keywords(&mut self) -> Result<Vec<Ident>, ParserError> {
         let mut idents = vec![];
         loop {
-            match self.peek_token() {
+            match self.peek_token().token {
                 Token::Word(w) => {
                     if w.keyword != Keyword::NoKeyword {
                         break;
@@ -6173,40 +6173,50 @@ impl<'a> Parser<'a> {
 
             let source = Box::new(self.parse_query()?);
             let on = if self.parse_keyword(Keyword::ON) {
-                self.expect_keyword(Keyword::DUPLICATE)?;
-                self.expect_keyword(Keyword::KEY)?;
-                self.expect_keyword(Keyword::UPDATE)?;
-                let l = self.parse_comma_separated(Parser::parse_assignment)?;
+                if self.parse_keyword(Keyword::CONFLICT) {
+                    let conflict_target =
+                        if self.parse_keywords(&[Keyword::ON, Keyword::CONSTRAINT]) {
+                            Some(ConflictTarget::OnConstraint(self.parse_object_name()?))
+                        } else if self.peek_token() == Token::LParen {
+                            Some(ConflictTarget::Columns(
+                                self.parse_parenthesized_column_list(IsOptional::Mandatory, false)?,
+                            ))
+                        } else {
+                            None
+                        };
 
-                self.expect_keyword(Keyword::DO)?;
-                let action = if self.parse_keyword(Keyword::NOTHING) {
-                    OnConflictAction::DoNothing
-                } else {
-                    self.expect_keyword(Keyword::UPDATE)?;
-                    self.expect_keyword(Keyword::SET)?;
-                    let assignments = self.parse_comma_separated(Parser::parse_assignment)?;
-                    let selection = if self.parse_keyword(Keyword::WHERE) {
-                        Some(self.parse_expr()?)
+                    self.expect_keyword(Keyword::DO)?;
+                    let action = if self.parse_keyword(Keyword::NOTHING) {
+                        OnConflictAction::DoNothing
                     } else {
-                        None
+                        self.expect_keyword(Keyword::UPDATE)?;
+                        self.expect_keyword(Keyword::SET)?;
+                        let assignments = self.parse_comma_separated(Parser::parse_assignment)?;
+                        let selection = if self.parse_keyword(Keyword::WHERE) {
+                            Some(self.parse_expr()?)
+                        } else {
+                            None
+                        };
+                        OnConflictAction::DoUpdate(DoUpdate {
+                            assignments,
+                            selection,
+                        })
                     };
-                    OnConflictAction::DoUpdate(DoUpdate {
-                        assignments,
-                        selection,
-                    })
-                };
 
-                Some(OnInsert::OnConflict(OnConflict {
-                    conflict_target,
-                    action,
-                }))
+                    Some(OnInsert::OnConflict(OnConflict {
+                        conflict_target,
+                        action,
+                    }))
+                } else {
+                    self.expect_keyword(Keyword::DUPLICATE)?;
+                    self.expect_keyword(Keyword::KEY)?;
+                    self.expect_keyword(Keyword::UPDATE)?;
+                    let l = self.parse_comma_separated(Parser::parse_assignment)?;
+
+                    Some(OnInsert::DuplicateKeyUpdate(l))
+                }
             } else {
-                self.expect_keyword(Keyword::DUPLICATE)?;
-                self.expect_keyword(Keyword::KEY)?;
-                self.expect_keyword(Keyword::UPDATE)?;
-                let l = self.parse_comma_separated(Parser::parse_assignment)?;
-
-                Some(OnInsert::DuplicateKeyUpdate(l))
+                None
             };
 
             let returning = if self.parse_keyword(Keyword::RETURNING) {

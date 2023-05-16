@@ -3279,18 +3279,6 @@ impl fmt::Display for GrantObjects {
     }
 }
 
-impl fmt::Display for OnInsert {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::DuplicateKeyUpdate(expr) => write!(
-                f,
-                " ON DUPLICATE KEY UPDATE {}",
-                display_comma_separated(expr)
-            ),
-        }
-    }
-}
-
 /// SQL assignment `foo = expr` as used in SQLUpdate
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
