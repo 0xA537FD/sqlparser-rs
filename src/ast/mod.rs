@@ -1699,26 +1699,6 @@ impl fmt::Display for GrantObjects {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[non_exhaustive]
-pub enum OnInsert {
-    /// ON DUPLICATE KEY UPDATE (MySQL when the key already exists, then execute an update instead)
-    DuplicateKeyUpdate(Vec<Assignment>),
-}
-
-impl fmt::Display for OnInsert {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::DuplicateKeyUpdate(expr) => write!(
-                f,
-                " ON DUPLICATE KEY UPDATE {}",
-                display_comma_separated(expr)
-            ),
-        }
-    }
-}
-
 /// SQL assignment `foo = expr` as used in SQLUpdate
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
